@@ -74,7 +74,7 @@ function consolidar(f: FatiaBucket | null, ads: DadosAds | null, praca: PracaSlu
     campanhas: (f?.campanhas.length ?? 0) + (g?.campanhas.length ?? 0),
     serie,
     ativa: (f?.ativa ?? false) || (g?.ativa ?? false),
-    emVeiculacao: (f?.campanhas ?? []).some((c) => c.effective_status === "ACTIVE"),
+    emVeiculacao: (f?.campanhas ?? []).some((c) => c.emVeiculacao),
   };
 }
 

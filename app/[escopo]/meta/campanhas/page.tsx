@@ -132,7 +132,7 @@ export default async function MetaCampanhas({
                       800px do rótulo e a linha deixava de ler como um par. */}
                   <div className="flex flex-wrap items-center gap-2">
                     <Etiqueta>{OBJETIVO_LABEL[c.objective] ?? c.objective}</Etiqueta>
-                    <StatusAtivo ativo={c.effective_status === "ACTIVE"} />
+                    <StatusAtivo ativo={c.emVeiculacao} />
                   </div>
                   <p
                     className="truncate text-[var(--fs-corpo-2)] font-semibold text-[var(--ink)]"
@@ -146,7 +146,15 @@ export default async function MetaCampanhas({
                       esquerda de um cartão de 800px. Mesmo arranjo do rodapé
                       dos cartões de canal no Overview. */}
                   <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-                    <Stat rotulo="Investido" valor={brlCompact(investido)} tamanho="sm" />
+                    {/* O gasto plataforma na linha de apoio: é o número que o
+                        Gerenciador mostra, e sem ele o cartão parece não bater
+                        com a conta (R$ 129,71 lá, R$ 148,24 aqui). */}
+                    <Stat
+                      rotulo="Investido"
+                      valor={brlCompact(investido)}
+                      sub={`${brl(c.m.spend)} na plataforma`}
+                      tamanho="sm"
+                    />
                     <Stat rotulo="CTR" valor={pct(c.m.ctr, 1)} tamanho="sm" />
                   </div>
                   {orcamento > 0 ? (

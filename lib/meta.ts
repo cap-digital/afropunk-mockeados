@@ -101,6 +101,16 @@ interface CampanhaBruta {
   stop_time?: string;
 }
 
+/** Só o que decide se o conjunto ainda entrega. */
+interface ConjuntoStatusBruto {
+  effective_status: string;
+  end_time?: string;
+}
+
+interface CampanhaComConjuntosBruta extends CampanhaBruta {
+  adsets?: { data?: ConjuntoStatusBruto[] };
+}
+
 interface AdBruto {
   id: string;
   name: string;
@@ -172,6 +182,11 @@ export interface Conta {
 
 export interface Campanha extends CampanhaBruta {
   bucket: Bucket | null;
+  /**
+   * Está entregando agora — o "Ativa" da tela. NÃO é `effective_status`:
+   * ver `estaEmVeiculacao`.
+   */
+  emVeiculacao: boolean;
 }
 
 export interface Metricas {
@@ -401,13 +416,51 @@ export async function getConta(): Promise<Conta> {
  * casam com a tag `[SSA]` e somariam ao Salvador.
  */
 export async function getCampanhasAtivas(): Promise<Campanha[]> {
-  const data = await graphAll<CampanhaBruta>(`${ACT}/campaigns`, {
+  const data = await graphAll<CampanhaComConjuntosBruta>(`${ACT}/campaigns`, {
     fields:
-      "id,name,status,effective_status,objective,lifetime_budget,daily_budget,start_time,stop_time",
+      "id,name,status,effective_status,objective,lifetime_budget,daily_budget,start_time,stop_time," +
+      "adsets.limit(200){effective_status,end_time}",
     effective_status: JSON.stringify(["ACTIVE", "PAUSED"]),
     limit: 200,
   });
-  return data.map((c) => ({ ...c, bucket: bucketDaCampanha(c.name, c.start_time) }));
+  const agora = Date.now();
+  return data.map(({ adsets, ...c }) => ({
+    ...c,
+    bucket: bucketDaCampanha(c.name, c.start_time),
+    emVeiculacao: estaEmVeiculacao(c, adsets?.data, agora),
+  }));
+}
+
+/** Data da API no passado. Sem data, não há término marcado. */
+const jaPassou = (iso: string | undefined, agora: number): boolean => {
+  if (!iso) return false;
+  const t = Date.parse(iso);
+  return Number.isFinite(t) && t <= agora;
+};
+
+/**
+ * A campanha está entregando agora?
+ *
+ * `effective_status` da campanha não responde isso. Ele só olha a chave da
+ * própria campanha: com todos os conjuntos pausados, ou com todos já passados
+ * da data de término, a campanha continua `ACTIVE` na API — e o painel dizia
+ * "Ativa" para Salvador dois dias depois do evento. O conjunto concluído é
+ * igual: a API devolve `ACTIVE` com `end_time` no passado; o "Concluído" do
+ * Gerenciador é calculado pela data, não vem num campo.
+ *
+ * Então: campanha ligada e sem término vencido, E pelo menos um conjunto
+ * ligado e sem término vencido. Se a API não devolver os conjuntos (lista
+ * vazia por permissão, por exemplo), vale o status da campanha sozinho — melhor
+ * um "Ativa" otimista do que derrubar a leitura do painel inteiro.
+ */
+function estaEmVeiculacao(
+  c: CampanhaBruta,
+  conjuntos: ConjuntoStatusBruto[] | undefined,
+  agora: number,
+): boolean {
+  if (c.effective_status !== "ACTIVE" || jaPassou(c.stop_time, agora)) return false;
+  if (!conjuntos || conjuntos.length === 0) return true;
+  return conjuntos.some((a) => a.effective_status === "ACTIVE" && !jaPassou(a.end_time, agora));
 }
 
 function filtroCampanhas(ids: string[]): string {
