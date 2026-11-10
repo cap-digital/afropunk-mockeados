@@ -146,15 +146,7 @@ export default async function MetaCampanhas({
                       esquerda de um cartão de 800px. Mesmo arranjo do rodapé
                       dos cartões de canal no Overview. */}
                   <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-                    {/* O gasto plataforma na linha de apoio: é o número que o
-                        Gerenciador mostra, e sem ele o cartão parece não bater
-                        com a conta (R$ 129,71 lá, R$ 148,24 aqui). */}
-                    <Stat
-                      rotulo="Investido"
-                      valor={brlCompact(investido)}
-                      sub={`${brl(c.m.spend)} na plataforma`}
-                      tamanho="sm"
-                    />
+                    <Stat rotulo="Investido" valor={brlCompact(investido)} tamanho="sm" />
                     <Stat rotulo="CTR" valor={pct(c.m.ctr, 1)} tamanho="sm" />
                   </div>
                   {orcamento > 0 ? (
