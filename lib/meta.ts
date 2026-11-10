@@ -407,7 +407,7 @@ export async function getCampanhasAtivas(): Promise<Campanha[]> {
     effective_status: JSON.stringify(["ACTIVE", "PAUSED"]),
     limit: 200,
   });
-  return data.map((c) => ({ ...c, bucket: bucketDaCampanha(c.name) }));
+  return data.map((c) => ({ ...c, bucket: bucketDaCampanha(c.name, c.start_time) }));
 }
 
 function filtroCampanhas(ids: string[]): string {

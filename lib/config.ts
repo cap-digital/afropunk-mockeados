@@ -69,7 +69,9 @@ export const PRACAS: Praca[] = [
     dataISO: "2026-11-07",
     local: "Pq. Exposições Salvador",
     cor: "#C08A12",
-    tags: ["[SSA]", "SALVADOR"],
+    // "- SSA]" pega "[CONVERSÃO AFROPUNK - SSA] [ CBO] [ARTISTAS]", que veio
+    // sem o "[SSA]" isolado no fim.
+    tags: ["[SSA]", "SALVADOR", "- SSA]"],
     regiao: "Bahia",
     absorveNacional: true,
   },
@@ -126,7 +128,7 @@ export const EDICAO = "2026";
 export const PISO_HISTORICO = "2025-01-01";
 
 /**
- * Descobre o bucket de uma campanha pelo nome.
+ * Descobre o bucket de uma campanha pelo nome (e, no Meta, pela data de início).
  * "[CONVERSAO AFROPUNK - RECIFE 2026] … [RECIFE]" → recife
  * "[ALCANCE AFROPUNK 2026] … [TODAS AS PRACAS]"   → nacional
  *
@@ -136,12 +138,19 @@ export const PISO_HISTORICO = "2025-01-01";
  * [NOVA FASE]" e "[CONVERSÃO] [SSA] [ABO]" — casam com a tag `[SSA]` e cairiam
  * dentro do Salvador, somando gasto de outro ano ao resultado de agora.
  *
+ * Nem toda campanha da edição traz o ano no nome: "[CONVERSÃO AFROPUNK - SSA]
+ * [ CBO] [ARTISTAS]" subiu em 29/10/2026 sem "2026". Por isso, quando a fonte
+ * informa o início (`inicio`, o `start_time` do Meta), começar no ano da edição
+ * também vale como marca. As campanhas antigas com tag de Salvador começaram
+ * todas em 2024/2025 e seguem fora.
+ *
  * Sem bucket, a campanha some dos dois escopos: `carregarEscopo` filtra por
  * `bucket !== null` tanto na praça quanto em "todas as praças".
  */
-export function bucketDaCampanha(nome: string): Bucket | null {
+export function bucketDaCampanha(nome: string, inicio?: string): Bucket | null {
   const upper = nome.toUpperCase();
-  if (!upper.includes(EDICAO)) return null;
+  const daEdicao = upper.includes(EDICAO) || (inicio?.startsWith(EDICAO) ?? false);
+  if (!daEdicao) return null;
   // Nacional primeiro: é a tag mais específica.
   if (TAGS_NACIONAL.some((t) => upper.includes(t))) return NACIONAL;
   for (const p of PRACAS) {
