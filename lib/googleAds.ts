@@ -9,6 +9,7 @@ import {
 } from "./config";
 import type { Periodo } from "./meta";
 import { hojeNaConta } from "./periodo";
+import { mockLinhaAds } from "./mock";
 
 /**
  * Cliente da Google Ads API por REST.
@@ -247,7 +248,8 @@ export async function consultarAds(
     pageToken = json.nextPageToken;
   } while (pageToken && guarda++ < 20);
 
-  return linhas;
+  // Mock: multiplica as métricas de volume antes de qualquer cálculo.
+  return linhas.map(mockLinhaAds);
 }
 
 /** Uma página da consulta, com até três tentativas em falha transitória. */

@@ -9,6 +9,7 @@ import { NavComBusca, NavPlataformas } from "./Nav";
 import { BotaoAtualizar } from "./BotaoAtualizar";
 import { FiltroPeriodo } from "./FiltroPeriodo";
 import { FiltroPracas } from "./FiltroPracas";
+import { AvisoMock } from "./AvisoMock";
 import { ESCOPO_TODAS, nomeDoEscopo, type EscopoSlug } from "@/lib/config";
 
 /**
@@ -253,6 +254,9 @@ export function Moldura({
             <BotaoAtualizar geradoEm={geradoEm} />
           </div>
         </header>
+
+        {/* Cópia de apresentação: o selo vale para toda página do painel. */}
+        <AvisoMock className="relative z-[1] shrink-0 self-start" />
 
         {/* `overflow-y-auto`, não `hidden`: quando o conteúdo não cabe — e em
             1280×720 ele não cabe — cortar em silêncio some com metade do

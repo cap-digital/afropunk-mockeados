@@ -1,5 +1,6 @@
 import "server-only";
 import crypto from "node:crypto";
+import { mockValoresGA4 } from "./mock";
 
 /**
  * Cliente da GA4 Data API.
@@ -196,7 +197,11 @@ export async function consultar(c: Consulta): Promise<LinhaGA4[]> {
 
   return (json.rows ?? []).map((r) => ({
     dims: (r.dimensionValues ?? []).map((d) => d.value ?? ""),
-    vals: (r.metricValues ?? []).map((m) => Number(m.value ?? 0) || 0),
+    // Mock: multiplica as métricas de volume antes de qualquer cálculo.
+    vals: mockValoresGA4(
+      c.metricas,
+      (r.metricValues ?? []).map((m) => Number(m.value ?? 0) || 0),
+    ),
   }));
 }
 

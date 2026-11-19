@@ -285,3 +285,22 @@ export const CAMPO_ATIVO_LABEL: Record<string, string> = {
   YOUTUBE_VIDEO: "Vídeo",
   CALL_TO_ACTION_SELECTION: "Chamada para ação",
 };
+
+// ---------------------------------------------------------------- mock
+
+/**
+ * CÓPIA DE APRESENTAÇÃO — dados mockeados.
+ *
+ * Todo número ABSOLUTO que chega das APIs (Meta, Google Ads, GA4) é
+ * multiplicado por este fator logo depois do fetch, em `lib/mock.ts`, antes de
+ * qualquer soma ou cálculo. As derivadas (CTR, CPM, CPC, CPA, ROAS, taxas,
+ * frequência, ticket médio) não são tocadas: ou vêm prontas da fonte, ou são
+ * recalculadas a partir dos valores já multiplicados — e, como numerador e
+ * denominador sobem juntos, continuam iguais e consistentes.
+ *
+ * Volte para 1 para ver os números reais.
+ */
+export const MOCK_MULTIPLIER = 2;
+
+/** Aviso exibido no topo de todas as páginas. */
+export const AVISO_MOCK = "Dados mockeados — valores ilustrativos para apresentação";

@@ -1,5 +1,6 @@
 import "server-only";
 import { bucketDaCampanha, type Bucket } from "./config";
+import { mockCampanhaMeta, mockLinhaMeta } from "./mock";
 
 const V = "v25.0";
 const BASE = `https://graph.facebook.com/${V}`;
@@ -153,6 +154,9 @@ async function graph<T>(path: string, params: Params = {}): Promise<T> {
 async function graphAll<T>(path: string, params: Params = {}): Promise<T[]> {
   let url: string | undefined = montarUrl(path, params);
   const out: T[] = [];
+  // Mock: toda métrica do Meta passa por `/insights`; o orçamento, por `/campaigns`.
+  const ehInsights = path.endsWith("/insights");
+  const ehCampanhas = path.endsWith("/campaigns");
   let guarda = 0;
   while (url && guarda++ < 25) {
     const res: Response = await fetch(url, {
@@ -164,7 +168,14 @@ async function graphAll<T>(path: string, params: Params = {}): Promise<T[]> {
       const e = json.error;
       throw new MetaError(e.message, e.code, e.type, e.fbtrace_id);
     }
-    out.push(...(json.data ?? []));
+    const linhas = json.data ?? [];
+    out.push(
+      ...(ehInsights
+        ? linhas.map((l) => mockLinhaMeta(l as Record<string, unknown>) as T)
+        : ehCampanhas
+          ? linhas.map((l) => mockCampanhaMeta(l as Record<string, unknown>) as T)
+          : linhas),
+    );
     url = json.paging?.next;
   }
   return out;

@@ -10,6 +10,7 @@ import { bucketsDaPraca, ESCOPO_TODAS, NACIONAL, PRACAS, type PracaSlug } from "
 import { carregarVisaoGeralGA4, type TotaisSite } from "@/lib/analytics";
 import { comImposto } from "@/lib/imposto";
 import type { PontoGrafico } from "@/components/charts";
+import { AvisoMock } from "@/components/AvisoMock";
 
 export const revalidate = REVALIDATE;
 
@@ -131,6 +132,7 @@ export default async function Capa() {
         <p className="surgir text-[var(--fs-corpo)] font-semibold uppercase tracking-[0.32em] text-[var(--ink-muted)] [animation-delay:2.4s]">
           Dashboard de mídia · Selecione a praça
         </p>
+        <AvisoMock className="mt-1" />
       </header>
 
       {/* Zona do meio: é ela que cresce, e é dentro dela que a seleção
